@@ -36,7 +36,7 @@ jobs:
         sudo pip3 install gdown > /dev/null 2>&1
         sudo pip3 install git+https://github.com/Juvenal-Yescas/mediafire-dl > /dev/null 2>&1
         wget https://mega.nz/linux/repo/xUbuntu_22.04/amd64/megacmd-xUbuntu_22.04_amd64.deb && sudo apt install "$PWD/megacmd-xUbuntu_22.04_amd64.deb" > /dev/null 2>&1
-        sudo mkdir -p openwrt > /dev/null 2>&1
+        sudo mkdir -p Armbian > /dev/null 2>&1
 
     - name: Download Firmware
       run: |
@@ -46,16 +46,16 @@ jobs:
           else
             link_gdrive=$(echo ${{ github.event.inputs.fw_link }} | awk -F "/" '{print $4}' | awk -F "?id=" '{print $2}'|awk -F "&export" '{print $1}')
           fi
-          sudo gdown ${link_gdrive} -O openwrt/$(echo "${{ github.event.inputs.fw_link }}" | awk -F/ '{print $NF}') >/dev/null
+          sudo gdown ${link_gdrive} -O Armbian/$(echo "${{ github.event.inputs.fw_link }}" | awk -F/ '{print $NF}') >/dev/null
         else
           if [ $(echo ${{ github.event.inputs.fw_link }} | grep "mediafire.com") ]; then
-            sudo mediafire-dl ${{ github.event.inputs.fw_link }} -o openwrt/$(echo "${{ github.event.inputs.fw_link }}" | awk -F/ '{print $NF}') >/dev/null
+            sudo mediafire-dl ${{ github.event.inputs.fw_link }} -o Armbian/$(echo "${{ github.event.inputs.fw_link }}" | awk -F/ '{print $NF}') >/dev/null
           else
             if [ $(echo ${{ github.event.inputs.fw_link }} | grep "mega.nz") ]; then
               file_mega=$(sudo mega-get ${{ github.event.inputs.fw_link }} | awk -F: '{print $2}')
-              sudo mv ${file_mega} openwrt/$(echo "${{ github.event.inputs.fw_link }}" | awk -F/ '{print $NF}')
+              sudo mv ${file_mega} Armbian/$(echo "${{ github.event.inputs.fw_link }}" | awk -F/ '{print $NF}')
             else
-              sudo wget --no-check-certificate ${{ github.event.inputs.fw_link }} -O openwrt/$(echo "${{ github.event.inputs.fw_link }}" | awk -F/ '{print $NF}') >/dev/null
+              sudo wget --no-check-certificate ${{ github.event.inputs.fw_link }} -O Armbian/$(echo "${{ github.event.inputs.fw_link }}" | awk -F/ '{print $NF}') >/dev/null
             fi
           fi
         fi
@@ -63,7 +63,7 @@ jobs:
     - name: Get extension
       id: get_extension
       run: |
-        filename=$(find ./openwrt -name "*.img.*")
+        filename=$(find ./Armbian -name "*.img.*")
         extension=$(basename "$filename" | sed -E 's/.*\.(img\.(gz|xz))$/\1/')
         no_extension=$(basename "$filename" | sed -E 's/\.(gz|xz)$//')
         echo "file_type=$extension" >> $GITHUB_ENV
@@ -71,10 +71,10 @@ jobs:
         
     - name: Extract firmware
       run: |
-        sudo mkdir -p openwrt/boot
-        sudo mv BootCardMaker/u-boot.bin openwrt/
-        sudo mv files/mod-boot-sdcard.tar.gz openwrt/
-        cd openwrt
+        sudo mkdir -p Armbian/boot
+        sudo mv BootCardMaker/u-boot.bin Armbian/
+        sudo mv files/mod-boot-sdcard.tar.gz Armbian/
+        cd Armbian
         if [ ${{ env.file_type }} = "img.gz" ]; then
           sudo gunzip ${{ env.file_name }}.gz
         else
@@ -119,7 +119,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
       with:
-        name: Mutiara-Wrt_Mod_SDCard
+        name: JoeNeed_Mod_SDCard
         tag_name: All
         draft: false
         prerelease: false
